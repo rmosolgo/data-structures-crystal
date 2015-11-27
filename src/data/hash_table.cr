@@ -59,6 +59,26 @@ module Data
       entry.try(&.value)
     end
 
+    # Crystal's hash has a much better time bc of its orderedness
+    def each
+      @slots_count.times do |idx|
+        entry = @slots[idx]
+        while entry
+          yield entry.key, entry.value
+          entry = entry.next
+        end
+      end
+      self
+    end
+
+    def map(&block : K, V -> T)
+      array = Array(T).new(@size)
+      each do |k, v|
+        array.push yield k, v
+      end
+      array
+    end
+
     private def slot_index_for_key(key)
       key.hash.abs % @slots_count
     end

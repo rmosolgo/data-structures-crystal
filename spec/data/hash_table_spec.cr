@@ -51,4 +51,17 @@ describe "Data::HashTable" do
       hash.slots_count.should eq(352)
     end
   end
+
+  describe "#each" do
+    it "enumerates in unknown order" do
+      hash = Data::HashTable(Int32, Symbol).new
+      hash.put(1, :one)
+      hash.put(2, :two)
+      hash.put(3, :three)
+      sum_of_keys = hash.map { |k, v| k }.inject { |m, i| m + i }
+      values = hash.map { |k, v| v }
+      sum_of_keys.should eq(6)
+      values.should eq([:one, :two, :three])
+    end
+  end
 end
