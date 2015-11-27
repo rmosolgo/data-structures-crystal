@@ -1,12 +1,13 @@
 module Data
   class HashTable(K, V)
     INITIAL_CAPACITY = 11
-    getter size
+    LINKS_PER_SLOT = 5
+    getter size, slots_count
 
     def initialize
       @size = 0
       @slots_count = INITIAL_CAPACITY
-      @slots = Pointer(Entry(K, V)?).malloc(@slots_count)
+      @slots = get_slots(@slots_count)
     end
 
     def get(key)
@@ -23,6 +24,10 @@ module Data
     end
 
     def put(key, value)
+      if needs_rehash?
+        rehash
+      end
+
       idx = slot_index_for_key(key)
       put_in_slot(idx, key, value)
       value
@@ -92,6 +97,34 @@ module Data
       end
       entry
     end
+
+    private def needs_rehash?
+      @size > (@slots_count * LINKS_PER_SLOT)
+    end
+
+    # Crystal's hash takes advantage of its ordered-ness
+    # to optimize the rehash. Meh.
+    private def rehash
+      old_slots_count = @slots_count
+      old_slots = @slots
+      # I think there are better resize patterns. Meh.
+      @slots_count = @slots_count * 2
+      # Allocate some more memory, then rewrite yourself into that memory.
+      @slots = get_slots(@slots_count)
+      @size = 0
+      old_slots_count.times do |slot|
+        entry = old_slots[slot]
+        while entry
+          self.put(entry.key, entry.value)
+          entry = entry.next
+        end
+      end
+    end
+
+    private def get_slots(slots_count)
+      Pointer(Entry(K, V)?).malloc(slots_count)
+    end
+
     # A key-value pair
     # A member of linked-list, in case of collisions
     class Entry(K, V)

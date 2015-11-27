@@ -1,6 +1,6 @@
 Some data structures implemented in Crystal, for kicks.
 
 - [x] LinkedList
-- [ ] HashTable
+- [x] HashTable
 - [ ] DynamicArray
 - [ ] Trie

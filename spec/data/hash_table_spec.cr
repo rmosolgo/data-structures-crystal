@@ -29,12 +29,26 @@ describe "Data::HashTable" do
       hash = Data::HashTable(Int32, Int32).new
       hash.put(1, 100)
       hash.put(2, 200)
-      hash.delete(1)
+      hash.delete(1).should eq(100)
+      hash.delete(1).should eq(nil)
       hash.get?(2).should eq(200)
       hash.get?(1).should eq(nil)
       hash.size.should eq(1)
-      hash.delete(2)
+      hash.delete(2).should eq(200)
       hash.size.should eq(0)
+    end
+  end
+
+  describe "#slots_count" do
+    it "rehashes" do
+      hash = Data::HashTable(Int32, Int32).new
+      hash.slots_count.should eq(11)
+      100.times { |i| hash.put(i, i * 2) }
+      hash.size.should eq(100)
+      hash.slots_count.should eq(22)
+      1000.times { |i| hash.put(i + 1000, i * 3) }
+      hash.size.should eq(1100)
+      hash.slots_count.should eq(352)
     end
   end
 end
