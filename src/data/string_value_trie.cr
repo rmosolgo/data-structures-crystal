@@ -1,15 +1,16 @@
 module Data
   # Stores key => value pairs where the key is a lowercased string
   class StringValueTrie(T)
+    alias Entry = Tuple(String, T)
     getter :size
     def initialize
       @size = 0
-      @buffer = Pointer(Nil | self | {String, T}).malloc(27)
+      @buffer = Pointer(Nil | self | Entry).malloc(27)
     end
 
     def get(key)
       entry = find_entry?(key)
-      if entry.is_a?(Tuple)
+      if entry.is_a?(Entry)
         entry[1]
       else
         raise("Key not found: #{key}")
@@ -18,7 +19,7 @@ module Data
 
     def get?(key)
       entry = find_entry?(key)
-      if entry.is_a?(Tuple(String, T))
+      if entry.is_a?(Entry)
         entry[1]
       else
         nil
@@ -29,16 +30,15 @@ module Data
       index = index_for_char(key[0]?)
       entry = @buffer[index]
       if entry.nil?
-        # TODO: is this casting really necessary?
-        @buffer[index] = {key as String, value as T}
+        @buffer[index] = Entry.new(key, value)
         @size += 1
         true
       elsif entry.is_a?(self)
         entry.set(key[1..-1], value) && (@size += 1)
-      elsif entry.is_a?(Tuple(String, T))
+      elsif entry.is_a?(Entry)
         old_key = entry[0]
         if old_key == key
-          new_entry = {key as String, value as T}
+          new_entry = Entry.new(key, value)
           @buffer[index] = new_entry
           false
         else
@@ -69,7 +69,7 @@ module Data
         else
           {false, nil}
         end
-      elsif entry.is_a?(Tuple(String, T))
+      elsif entry.is_a?(Entry)
         if entry[0] == key
           value = entry[0]
           @buffer[index] = nil
@@ -98,7 +98,7 @@ module Data
       LETTERS.each do |letter|
         idx = index_for_char(letter)
         entry = @buffer[idx]
-        if entry.is_a?(Tuple(String, T))
+        if entry.is_a?(Entry)
           key = "#{prefix}#{entry[0]}"
           acc[key] = entry[1]
         elsif entry.is_a?(self)
@@ -116,7 +116,7 @@ module Data
         {key, entry}
       elsif entry.is_a?(self)
         entry.find_entry?(key[1..-1])
-      elsif entry.is_a?(Tuple(String, T))
+      elsif entry.is_a?(Entry)
         if entry[0] == key
           entry
         else
