@@ -1,6 +1,8 @@
-Some data structures implemented in Crystal, for kicks.
+Simple data structures implemented in Crystal as a learning experience.
 
 - [x] LinkedList
 - [x] HashTable
-- [ ] DynamicArray
+- [x] DynamicArray
 - [ ] Trie
+- [ ] Handle fancy-shmancy negative indexes
+- [ ] Implement real nice APIs like Crystal stdlib
