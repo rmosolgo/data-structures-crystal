@@ -6,6 +6,7 @@ Simple data structures implemented in Crystal as a learning experience.
 - [x] LinkedList
 - [x] HashTable
 - [x] DynamicArray
-- [ ] Trie
-- [ ] Handle fancy-shmancy negative indexes
-- [ ] Implement real nice APIs like Crystal stdlib
+- [x] String Trie (stores a set of strings)
+- [ ] Hash Trie (stores whatever)
+- [ ] ~~Handle fancy-shmancy negative indexes~~
+- [ ] ~~Implement real nice APIs like Crystal stdlib~~
