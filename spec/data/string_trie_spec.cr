@@ -55,19 +55,6 @@ describe "StringTrie" do
     end
   end
 
-  describe "#to_a" do
-    it "returns the added strings" do
-      trie = Data::StringTrie.new
-
-      trie.add("crystal")
-      trie.add("ruby")
-      trie.add("rudy")
-      trie.add("elixir")
-      trie.add("eli")
-      trie.to_a.should eq(["crystal", "eli", "elixir", "ruby", "rudy"])
-    end
-  end
-
   describe "proper nesting" do
     it "makes subtries for nesting" do
       trie = Data::StringTrie.new
