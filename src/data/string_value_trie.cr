@@ -1,16 +1,22 @@
 module Data
   # Stores key => value pairs where the key is a lowercased string
   class StringValueTrie(T)
+    struct Entry(T)
+      getter key, value
+      def initialize(@key : String, @value : T)
+      end
+    end
+
     getter :size
     def initialize
       @size = 0
-      @buffer = Pointer(Nil | self | {String, T}).malloc(27)
+      @buffer = Pointer(Nil | self | Entry(T)).malloc(27)
     end
 
     def get(key)
       entry = find_entry?(key)
-      if entry.is_a?(Tuple)
-        entry[1]
+      if entry.is_a?(Entry(T))
+        entry.value
       else
         raise("Key not found: #{key}")
       end
@@ -18,8 +24,8 @@ module Data
 
     def get?(key)
       entry = find_entry?(key)
-      if entry.is_a?(Tuple(String, T))
-        entry[1]
+      if entry.is_a?(Entry(T))
+        entry.value
       else
         nil
       end
@@ -29,21 +35,20 @@ module Data
       index = index_for_char(key[0]?)
       entry = @buffer[index]
       if entry.nil?
-        # TODO: is this casting really necessary?
-        @buffer[index] = {key as String, value as T}
+        @buffer[index] = Entry(T).new(key, value)
         @size += 1
         true
       elsif entry.is_a?(self)
         entry.set(key[1..-1], value) && (@size += 1)
-      elsif entry.is_a?(Tuple(String, T))
-        old_key = entry[0]
+      elsif entry.is_a?(Entry(T))
+        old_key = entry.key
         if old_key == key
-          new_entry = {key as String, value as T}
+          new_entry = Entry(T).new(key, value)
           @buffer[index] = new_entry
           false
         else
           new_trie = self.class.new
-          old_value = entry[1]
+          old_value = entry.value
           new_trie.set(old_key[1..-1], old_value)
           new_trie.set(key[1..-1], value)
           @buffer[index] = new_trie
@@ -69,9 +74,9 @@ module Data
         else
           {false, nil}
         end
-      elsif entry.is_a?(Tuple(String, T))
-        if entry[0] == key
-          value = entry[0]
+      elsif entry.is_a?(Entry(T))
+        if entry.key == key
+          value = entry.value
           @buffer[index] = nil
           @size -= 1
           {true, value}
@@ -98,9 +103,9 @@ module Data
       LETTERS.each do |letter|
         idx = index_for_char(letter)
         entry = @buffer[idx]
-        if entry.is_a?(Tuple(String, T))
-          key = "#{prefix}#{entry[0]}"
-          acc[key] = entry[1]
+        if entry.is_a?(Entry(T))
+          key = "#{prefix}#{entry.key}"
+          acc[key] = entry.value
         elsif entry.is_a?(self)
           entry.reduce_keys("#{prefix}#{letter}", acc)
         end
@@ -116,8 +121,8 @@ module Data
         {key, entry}
       elsif entry.is_a?(self)
         entry.find_entry?(key[1..-1])
-      elsif entry.is_a?(Tuple(String, T))
-        if entry[0] == key
+      elsif entry.is_a?(Entry(T))
+        if entry.key == key
           entry
         else
           nil
