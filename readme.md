@@ -10,6 +10,6 @@ Simple data structures implemented in Crystal as a learning experience.
   - [x] String Trie (stores a set of strings)
   - [x] String => Value Trie (stores string => whatever pairs)
   - [ ] String Array Mapped Trie (stores strings, uses a bitmap + array for storage)
-  - [ ] Hash Trie (stores key => value of whatever)
+  - [ ] Hash Trie (stores key => whatever pairs)
 - [ ] ~~Handle fancy-shmancy negative indexes~~
 - [ ] ~~Implement real nice APIs like Crystal stdlib~~
