@@ -155,7 +155,26 @@ module Data
     end
 
     def to_a
-      [] of String
+      array = [] of String
+      reduce_values(array)
+      array
+    end
+
+    protected def reduce_values(acc)
+      final_size = acc.size + @size
+      buffer_offset = 0
+      while acc.size < final_size
+        entry = @buffer[buffer_offset]
+        if entry.is_a?(Entry)
+          while entry
+            acc << entry.value
+            entry = entry.next
+          end
+        elsif entry.is_a?(self)
+          entry.reduce_values(acc)
+        end
+        buffer_offset += 1
+      end
     end
 
     # get the number of 1s _below_ the given bitnumber

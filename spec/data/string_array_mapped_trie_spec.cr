@@ -60,9 +60,10 @@ describe "StringArrayMappedTrie" do
       trie.add("crystal")
       trie.add("ruby")
       trie.add("rudy")
+      trie.add("qway")
       trie.add("elixir")
       trie.add("eli")
-      trie.to_a.should eq(["crystal", "eli", "elixir", "ruby", "rudy"])
+      trie.to_a.should eq(["eli", "ruby", "qway", "rudy", "elixir", "crystal"])
     end
   end
 end
