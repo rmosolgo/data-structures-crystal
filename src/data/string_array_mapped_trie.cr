@@ -38,7 +38,16 @@ module Data
       # Which position does this belong in the array?
       stored_offset = popcount(@bitmap, array_index)
       if !already_present
-        add_entry(stored_offset, hash, word)
+        @size += 1
+        @buffer = @buffer.realloc(@size)
+        # eg,
+        #   [1, 2, 3, 4, _]
+        #        \  \  \
+        #   [1, 2, 2, 3, 4]
+        from_buffer = @buffer + stored_offset
+        to_buffer = from_buffer + 1
+        to_buffer.move_from(from_buffer, 1)
+        @buffer[stored_offset] = Entry.new(word)
         true
       else
         entry = @buffer[stored_offset]
@@ -182,20 +191,6 @@ module Data
       count = 0
       bitnumber.times { |i| count += bitmap.bit(i) }
       count
-    end
-
-    # get an entry at `idx`, inserting if necessary
-    private def add_entry(idx, hash, word)
-      @size += 1
-      @buffer = @buffer.realloc(@size)
-      # eg,
-      #   [1, 2, 3, 4, _]
-      #        \  \  \
-      #   [1, 2, 2, 3, 4]
-      from_buffer = @buffer + idx
-      to_buffer = from_buffer + 1
-      to_buffer.move_from(from_buffer, 1)
-      @buffer[idx] = Entry.new(word)
     end
 
     # get the part of the hash this object cares about
