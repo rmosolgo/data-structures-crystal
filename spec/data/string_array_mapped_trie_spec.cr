@@ -7,14 +7,17 @@ describe "StringArrayMappedTrie" do
 
       trie.add("crystal")
       trie.add("ruby")
+      trie.add("qway")
       trie.add("rudy")
       trie.add("elixir")
 
       trie.bitmap.should eq(1)
-      trie.size.should eq(4)
+      trie.size.should eq(5)
 
       trie.remove("ruby")
       trie.remove("elixir")
+      trie.size.should eq(3)
+      trie.remove("qway")
       trie.size.should eq(2)
     end
   end
@@ -33,13 +36,16 @@ describe "StringArrayMappedTrie" do
       trie.add("eli")
 
       trie.contains?("crystal").should eq(true)
-      trie.contains?("ruby").should eq(true)
-      trie.contains?("qway").should eq(true)
-      trie.contains?("rvay").should eq(false)
-
       trie.contains?("rudy").should eq(true)
       trie.contains?("elixir").should eq(true)
       trie.contains?("eli").should eq(true)
+      # These all have the same hash:
+      trie.contains?("ruby").should eq(true)
+      trie.contains?("qway").should eq(true)
+      trie.contains?("rvay").should eq(false)
+      trie.remove("ruby")
+      trie.contains?("qway").should eq(true)
+      trie.contains?("ruby").should eq(false)
 
       trie.remove("rudy")
       trie.contains?("rudy").should eq(false)
