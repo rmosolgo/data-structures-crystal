@@ -31,13 +31,11 @@ module Data
 
     protected def add_hash(hash, word)
       array_index = idx_for_hash(hash)
-      array_index_map = 1 << array_index
-      already_present = (@bitmap & array_index_map) > 0
-      @bitmap |= array_index_map
-      # ^ eg, 0b0001 => 0b0101
+      present, mask = already_present?(array_index)
       # Which position does this belong in the array?
       stored_offset = popcount(@bitmap, array_index)
-      if !already_present
+      if !present
+        @bitmap |= mask
         @size += 1
         @buffer = @buffer.realloc(@size)
         # eg,
@@ -82,8 +80,7 @@ module Data
 
     protected def remove_hash(hash, word)
       array_index = idx_for_hash(hash)
-      array_index_map = 1 << array_index
-      already_present = (@bitmap & array_index_map) > 0
+      already_present, mask = already_present?(array_index)
       if !already_present
         nil
       else
@@ -101,7 +98,7 @@ module Data
               next_entry = entry.next
               if prev_entry.nil? && next_entry.nil?
                 # remove from bitmap
-                @bitmap = @bitmap ^ array_index_map
+                @bitmap = @bitmap ^ mask
                 # remove from storage array
                 if stored_offset < @size
                   # [1, 2, 3, 4]
@@ -141,9 +138,8 @@ module Data
 
     protected def contains_hash?(hash, word)
       array_index = idx_for_hash(hash)
-      array_index_map = 1 << array_index
-      already_present = (@bitmap & array_index_map) > 0
-      if !already_present
+      present, mask = already_present?(array_index)
+      if !present
         false
       else
         stored_offset = popcount(@bitmap, array_index)
@@ -195,22 +191,20 @@ module Data
 
     # get the part of the hash this object cares about
     private def idx_for_hash(hash)
-      # clear the front
-      if @depth == 0
-        # 1 << 32 is zero because wrap-around
-        idx = hash >> (WORD_SIZE - INDEX_SIZE)
-      else
-        first_bit = (WORD_SIZE - (@depth * INDEX_SIZE))
-        # clear the upper bits
-        idx = (hash % (1 << first_bit))
-        # then shift away the lower bits
-        idx = idx >> (first_bit - 2)
-      end
-      idx
+      first_bit = (WORD_SIZE - (@depth * INDEX_SIZE))
+      # this is because INDEX_SIZE is 2, grab the two bits
+      idx = (hash.bit(first_bit) << 1) | (hash.bit(first_bit - 1))
+      return idx
     end
 
     private def hash_from_word(word)
       word.each_char.inject(0) { |m, c| m + c.ord }
+    end
+
+    private def already_present?(idx)
+      idx_mask = 1 << idx
+      already_present = (@bitmap & idx_mask) > 0
+      {already_present, idx_mask}
     end
   end
 end
