@@ -192,9 +192,10 @@ module Data
     # get the part of the hash this object cares about
     private def idx_for_hash(hash)
       first_bit = (WORD_SIZE - (@depth * INDEX_SIZE))
-      # this is because INDEX_SIZE is 2, grab the two bits
-      idx = (hash.bit(first_bit) << 1) | (hash.bit(first_bit - 1))
-      return idx
+      INDEX_SIZE.times.inject(0) do |idx, i|
+        bit = hash.bit(first_bit - i)
+        idx |= (bit << (INDEX_SIZE - i - 1))
+      end
     end
 
     private def hash_from_word(word)
